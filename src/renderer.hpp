@@ -90,7 +90,7 @@ struct imageInfo_t {
 
 struct renderer_t {
 	const char* appName_c = "obj_inspect_inator";
-	const uint32_t version_c = 01; // 01 = 0.1
+	const uint32_t version_c = 01; 
 	const std::vector<const char*> deviceExtensions_c = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
