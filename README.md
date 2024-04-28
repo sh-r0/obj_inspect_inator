@@ -14,7 +14,7 @@ To build following project it's necessary to install/build VulkanSDK (https://vu
 In CMakeLists.txt file set paths to vulkan and GLFW library directories in CONFIG INFORMATION section  
 
 ### Shaders
-In Order to rebuild shaders set glslc.exe filepath to compile_shaders.bat script
+You may need to rebuild shaders, in order to do so, provide path to glslc.exe (it should be shipped with VulkanSDK) to "compile_shaders.bat" script
 
 ## Dependencies
 * vulkan - https://www.vulkan.org
