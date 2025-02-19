@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/hash.hpp"
 
+#include <filesystem>
 #include <array>
 #include <vector>
 #include <optional>
@@ -142,7 +143,7 @@ struct renderer_t {
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 	uint32_t currentFrame = 0;
-	std::string objPath;
+	std::filesystem::path objPath;
 
 	void initRenderer(const std::string&);
 	

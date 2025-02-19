@@ -1,5 +1,8 @@
+#include <chrono>
 #include <iostream>
 #include <filesystem>
+#include <thread>
+#include <format>
 #include "renderer.hpp"
 
 double x = 0, y = 0;
@@ -56,12 +59,17 @@ int32_t main(int32_t _argc, char** _argv) {
 	renderer_t renderer;
 	renderer.initRenderer(_argv[1]);
 	glfwSetScrollCallback(renderer.window, scroll_callback);
+    std::cout<<"initialized renderer\n";
 
+    int32_t frame = 0;
 	while (!glfwWindowShouldClose(renderer.window)) {
 		glfwPollEvents();
 		renderer.drawFrame();
 		inputCheck(renderer.window, renderer);
-	}
+        //std::cout<<std::format("frame: {}\n", frame++);
+        //if(frame==5)
+        //    while (true) { 0; }
+    }
 
 	renderer.cleanup();
 	return EXIT_SUCCESS;

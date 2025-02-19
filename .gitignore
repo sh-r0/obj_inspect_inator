@@ -1,5 +1,7 @@
 CMakeFiles
-CmakeCache.txt
+CMakeCache.txt
+Makefile
+obj_inspect_inator
 *.cmake
 Debug
 Release
@@ -9,6 +11,8 @@ Release
 *.vcxproj.user
 *.sln
 *.exe
+res/shaders
+test
 win32
 _CMakeLists.txt
 _compile_shaders.bat

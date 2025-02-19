@@ -5,6 +5,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+#include <format>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -13,6 +14,8 @@
 #include <unordered_map>
 #include <chrono>
 #include <filesystem>
+
+#define _DEBUG 1
 
 #ifdef _DEBUG
 const bool enableValidationLayers = true;
@@ -44,7 +47,8 @@ void renderer_t::framebuffResizeCallback(GLFWwindow* _window, int32_t _newX, int
 
 void renderer_t::initWindow(void) {
     glfwInit();
-    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     window = glfwCreateWindow(winSizeX, winSizeY, appName_c, nullptr, nullptr);
@@ -802,7 +806,7 @@ void renderer_t::createTextureImages(std::string& _path, VkImage& _img, VkDevice
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels) 
-        throw std::runtime_error("failed to load texture image!");
+        throw std::runtime_error(std::format("failed to load texture image: {}!", _path));
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -1191,11 +1195,14 @@ void renderer_t::recreateSwapChain(void) {
      }
 
     vkDeviceWaitIdle(device);
+    
     cleanupSwapChain();
+    
     createSwapChain();
     createImageViews();
     createDepthResources();
     createFramebuffers();
+   
     return;
 }
 
@@ -1206,22 +1213,24 @@ void renderer_t::loadObj() {
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
-    std::string objDir = std::filesystem::path(objPath).parent_path().generic_string();
+    std::filesystem::path objDir = objPath.parent_path();
 
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, objPath.c_str(), objDir.c_str()))
         throw std::runtime_error(warn + err);
 
     for (const auto& mat : materials) {
+        auto matPath = objDir / mat.diffuse_texname;
         if (texturesCount >= 16) break;
-        if (!std::filesystem::exists(objDir +"/"+ mat.diffuse_texname))
+        if (!std::filesystem::exists(matPath))
             continue;
 
         imageInfo_t img{};
-        img.path = objDir + "/" + mat.diffuse_texname;
-        std::cout << img.path;
+        img.path = matPath;
         textureImages[texturesCount] = img;
         texturesCount++;
-    } 
+    }
+
+
     if(texturesCount < 16) {   //putting reserve texture, so that it doesnt crash when no textures are in directory
         imageInfo_t img{};
         img.path = "reserve.png";
@@ -1234,18 +1243,20 @@ void renderer_t::loadObj() {
         for (const auto& index : shape.mesh.indices) {
             vertex_t vertex{};
 
-            vertex.pos = {
-                attrib.vertices[3 * index.vertex_index + 0],
-                attrib.vertices[3 * index.vertex_index + 1],
-                attrib.vertices[3 * index.vertex_index + 2]
-            };
-
-            vertex.normal = {
-                attrib.normals[3 * index.normal_index + 0],
-                attrib.normals[3 * index.normal_index + 1],
-                attrib.normals[3 * index.normal_index + 2]
-            };
-
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+        
+            if(index.normal_index >= 0) {
+                vertex.normal = {
+                    attrib.normals[3 * index.normal_index + 0],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2]
+                };
+            }
+            
             vertex.texCoord = {
                          attrib.texcoords[2*index.texcoord_index + 0],
                 1.0f - attrib.texcoords[2*index.texcoord_index + 1]
@@ -1390,7 +1401,7 @@ void renderer_t::drawFrame(void) {
     VkSwapchainKHR swapChains[] = { swapChain };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
-
+    
     presentInfo.pImageIndices = &imageIndex;
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
