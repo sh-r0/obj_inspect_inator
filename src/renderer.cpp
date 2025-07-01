@@ -17,7 +17,7 @@
 
 #define _DEBUG 1
 
-#ifdef _DEBUG
+#ifdef _DEBUG 
 const bool enableValidationLayers = true;
 #else 
 const bool enableValidationLayers = false;
@@ -38,6 +38,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 void renderer_t::framebuffResizeCallback(GLFWwindow* _window, int32_t _newX, int32_t _newY) {
+    std::cout<<"FRAMEBUFFER RESIZED!\n\n\n\n";
     renderer_t* renderer = reinterpret_cast<renderer_t*>(glfwGetWindowUserPointer(_window));
     renderer->winSizeX = _newX;
     renderer->winSizeY = _newY;
@@ -45,10 +46,11 @@ void renderer_t::framebuffResizeCallback(GLFWwindow* _window, int32_t _newX, int
     return;
 }
 
+//adfadf
 void renderer_t::initWindow(void) {
     glfwInit();
     //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    //glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     window = glfwCreateWindow(winSizeX, winSizeY, appName_c, nullptr, nullptr);
@@ -641,6 +643,7 @@ void renderer_t::createGraphicsPipeline(void) {
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) 
         throw std::runtime_error("failed to create pipeline layout!");
 
+    //post processing pipeline
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
@@ -1196,8 +1199,10 @@ void renderer_t::recreateSwapChain(void) {
 
     vkDeviceWaitIdle(device);
     
+    std::cout<<"before cleanup\n\n\n\n\n";
     cleanupSwapChain();
-    
+    std::cout<<"after cleanup\n\n\n\n";
+
     createSwapChain();
     createImageViews();
     createDepthResources();
@@ -1221,7 +1226,7 @@ void renderer_t::loadObj() {
     for (const auto& mat : materials) {
         auto matPath = objDir / mat.diffuse_texname;
         if (texturesCount >= 16) break;
-        if (!std::filesystem::exists(matPath))
+        if (!std::filesystem::exists(matPath) || matPath.filename() == "")
             continue;
 
         imageInfo_t img{};
@@ -1286,7 +1291,7 @@ void renderer_t::updateUBO() {
     ubo.model = glm::scale(glm::mat4(1.0f), glm::vec3(zoomInv));
     ubo.model = glm::rotate(ubo.model, glm::radians(rotX), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.model = glm::rotate(ubo.model, glm::radians(rotYZ), glm::vec3(std::cos(glm::radians(rotX)), -std::sin(glm::radians(rotX)), 0.0f));
-    ubo.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = glm::lookAt(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
     ubo.proj[1][1] *= -1;
 
